@@ -1,0 +1,121 @@
+// datasource db defines the database connection settings.
+// It is configured for PostgreSQL and uses an environment variable for the connection URL.
+// The 'extensions' feature enables the use of PostgreSQL-specific data types.
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+}
+
+// generator db configures Prisma Client settings.
+// It is set up to use Prisma Client Python with asyncio interface and specific features.
+generator db {
+  provider             = "prisma-client-py"
+  interface            = "asyncio"
+  recursive_type_depth = 5
+  previewFeatures      = ["postgresqlExtensions"]
+}
+
+model User {
+  id        String   @id @default(dbgenerated("gen_random_uuid()"))
+  email     String   @unique
+  password  String
+  role      Role
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relationships
+  UserPreferences    UserPreferences[]
+  TextConversionJobs TextConversionJob[]
+  ApiKey             ApiKey[]
+  Analytics          Analytics[]
+  Subscription       Subscription[]
+  LoginAttempt       LoginAttempt[]
+}
+
+model UserPreferences {
+  id        String   @id @default(dbgenerated("gen_random_uuid()"))
+  userId    String
+  language  String
+  voiceType String
+  speed     Float
+  pitch     Float
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relationships
+  user User @relation(fields: [userId], references: [id])
+}
+
+model TextConversionJob {
+  id           String    @id @default(dbgenerated("gen_random_uuid()"))
+  userId       String
+  text         String
+  status       JobStatus
+  audioFileUrl String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  // Relationships
+  user User @relation(fields: [userId], references: [id])
+}
+
+model ApiKey {
+  id        String   @id @default(dbgenerated("gen_random_uuid()"))
+  key       String   @unique
+  userId    String
+  createdAt DateTime @default(now())
+
+  // Relationships
+  user User @relation(fields: [userId], references: [id])
+}
+
+model Analytics {
+  id          String   @id @default(dbgenerated("gen_random_uuid()"))
+  userId      String?
+  action      String
+  description String?
+  createdAt   DateTime @default(now())
+
+  // Optional User relationship if analytics are to be tied to specific users
+  user User? @relation(fields: [userId], references: [id])
+}
+
+model Subscription {
+  id          String            @id @default(dbgenerated("gen_random_uuid()"))
+  userId      String
+  activeUntil DateTime
+  level       SubscriptionLevel
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  // Relationships
+  user User @relation(fields: [userId], references: [id])
+}
+
+model LoginAttempt {
+  id        String   @id @default(dbgenerated("gen_random_uuid()"))
+  userId    String
+  succeeded Boolean
+  createdAt DateTime @default(now())
+
+  // Relationship
+  user User @relation(fields: [userId], references: [id])
+}
+
+enum Role {
+  ADMIN
+  USER
+  SUBSCRIBER
+}
+
+enum JobStatus {
+  PENDING
+  COMPLETED
+  FAILED
+}
+
+enum SubscriptionLevel {
+  BASIC
+  PREMIUM
+}
+

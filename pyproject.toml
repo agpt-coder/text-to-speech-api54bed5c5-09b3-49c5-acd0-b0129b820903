@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "text-to-speech-api"
+version = "0.1.0"
+description = "To accomplish the task of accepting plain text input from a user, converting this text to natural-sounding speech audio using a popular Python package, and returning the generated audio file within a FastAPI application, the following steps and technologies will be integrated based on the information gathered so far:"
+authors = ["AutoGPT <info@agpt.co>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">=3.11"
+fastapi = "*"
+gtts = "*"
+prisma = "*"
+pydantic = "*"
+uvicorn = "*"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
